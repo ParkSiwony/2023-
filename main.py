@@ -1,22 +1,47 @@
-import numpy as np
-import pandas as pd
+from neuron import h, gui
 
-def compare(x):  # x에 들어갈 것은 반복 횟수
-    Final_count = []
-    for i in range(0, x, 1):
-        Same_count = []
-        RN = np.random.randint(10, size=1000000)
-        for j in range(0, 1000000 - 5):  # 뒤에서 6번째 까지만
-            if np.array_equal(RN[j:j + 6], np.array([3, 4, 0, 0, 2, 7])):  # np array 비교
-                Same_count.append(1)
-        Final_count.append(len(Same_count))
-    Expected_value = int(sum(Final_count))
-    Result = Expected_value/x
-    return Result
+soma = h.Section(name='soma')
+h.psection()
 
-print(compare(100))
+dir(soma)
+# Run the simulation
+help(soma.connect)
 
-#이론적인 개수
-n=999995
-p=0.1**6
-print(n*p)
+soma.insert('pas')
+
+print("type(soma) = {}".format(type(soma)))
+print("type(soma(0.5)) ={}".format(type(soma(0.5))))
+
+mech = soma(0.5).pas
+print(dir(mech))
+print(mech.g)
+print(soma(0.5).pas.g)
+
+asyn = h.AlphaSynapse(soma(0.5))
+dir(asyn)
+
+print("asyn.e = {}".format(asyn.e))
+print("asyn.gmax = {}".format(asyn.gmax))
+print("asyn.onset = {}".format(asyn.onset))
+print("asyn.tau = {}".format(asyn.tau))
+
+
+asyn.onset = 20
+asyn.gmax = 1
+h.psection()
+
+v_vec = h.Vector()             # Membrane potential vector
+t_vec = h.Vector()             # Time stamp vector
+v_vec.record(soma(0.5)._ref_v)
+t_vec.record(h._ref_t)
+
+h.tstop = 50
+h.run()
+
+# Plot the results
+import matplotlib.pyplot as plt
+plt.figure(figsize=(8,4)) # Default figsize is (8,6)
+plt.plot(t_vec, v_vec)
+plt.xlabel('time (ms)')
+plt.ylabel('mV')
+plt.show()
